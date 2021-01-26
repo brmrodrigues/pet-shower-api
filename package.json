@@ -1,0 +1,30 @@
+{
+  "name": "pet-shower-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brmrodrigues/pet-shower-api.git"
+  },
+  "author": "Bruno Rodrigues",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brmrodrigues/pet-shower-api/issues"
+  },
+  "homepage": "https://github.com/brmrodrigues/pet-shower-api#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "consign": "^0.1.6",
+    "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "mysql": "^2.18.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  }
+}
