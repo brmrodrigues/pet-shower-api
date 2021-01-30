@@ -1,67 +1,77 @@
+const axios = require('axios')
 const moment = require('moment')
-const connection = require('../db/connection')
+const connection = require('../infra/db/connection')
+const repository = require('../repositories/appointment')
 
 class Appointment {
-    add(appointment, res) {
-        const creation_date = moment().format('YYYY-MM-DD HH:MM:SS')
-        const schedule_date = moment(appointment.schedule_date, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS')
-        
-        const isScheduleDateValid = moment(schedule_date).isSameOrAfter(creation_date)
-        const isClientValid = appointment.client.length >= 5
 
-        const validations = [
+    constructor() {
+
+        this.isScheduleDateValid = ({schedule_date, creation_date}) => moment(schedule_date).isSameOrAfter(creation_date)
+        this.isClientValid = (length) => length >= 5
+
+        this.validate = (parameters) => {
+            this.validations.filter(field => {
+                const {name}  = field
+                const parameter = parameters[name]
+
+                return !field.valid(parameter)
+            })
+        }
+
+        this.validations = [
             {
                 name: 'schedule_date',
-                valid: isScheduleDateValid,
+                valid: this.isScheduleDateValid,
                 message: 'Schedule Date must be same or after current date!'
             },
             {
                 name: 'client',
-                valid: isClientValid,
+                valid: this.isClientValid,
                 message: 'Client must have at least fice characters'
             }
         ]
+    }
+    add(appointment) {
+        const creation_date = moment().format('YYYY-MM-DD HH:MM:SS')
+        const schedule_date = moment(appointment.schedule_date, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS')
 
-        const validationErrors = validations.filter(field => !field.valid)
+        const parameters = {
+            schedule_date: {schedule_date, creation_date},
+            client: {length: appointment.client.length}
+        }
+
+        const validationErrors = this.validate(parameters)
         const hasErros = validationErrors.length
 
         if (hasErros) {
-            res.status(400).json(validationErrors)
+            return new Promise((resolve, reject) => {reject(validationErrors)})
         } else {
             const appointmentWithDate = {...appointment, creation_date, schedule_date}
 
-            const sql = 'INSERT INTO appointments SET ?'
-
-            connection.query(sql, appointmentWithDate, (error, results) => {
-                if (error) {
-                    res.status(400).json(error)
-                } else {
-                    res.status(201).json(results)
-                }
-            })
+            return repository.add(appointmentWithDate)
+                .then((results) => {
+                    const id = results.insertId
+                    return {... appointment, id}
+                })
         }
     }
 
-    list(res) {
-        const sql = 'SELECT * FROM appointments'
-
-        connection.query(sql, (error, results) => {
-            if (error) {
-                res.status(400).json()
-            } else {
-                res.status(200).json(results)
-            }
-        })
+    list() {
+        return repository.list()
     }
 
     findById(id, res) {
         const sql = `SELECT * FROM appointments WHERE id=${id}`
 
-        connection.query(sql, (error, results) => {
+        connection.query(sql, async (error, results) => {
             const appointment = results[0]
+            const cpf = appointment.client
             if (error) {
                 res.status(400).json(error)
             } else {
+                const {data} = await axios.get(`http://localhost:8082/${cpf}`)
+                appointment.client = data
                 res.status(200).json(appointment)
             }
         })
