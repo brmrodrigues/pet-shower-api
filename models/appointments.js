@@ -8,16 +8,17 @@ class Appointment {
     constructor() {
 
         this.isScheduleDateValid = ({schedule_date, creation_date}) => moment(schedule_date).isSameOrAfter(creation_date)
-        this.isClientValid = (length) => length >= 5
 
-        this.validate = (parameters) => {
+        this.isClientValid = ({ length }) => {
+            return length >= 5
+        }
+
+        this.validate = parameters => 
             this.validations.filter(field => {
-                const {name}  = field
+                const { name }  = field
                 const parameter = parameters[name]
-
                 return !field.valid(parameter)
             })
-        }
 
         this.validations = [
             {
@@ -28,14 +29,13 @@ class Appointment {
             {
                 name: 'client',
                 valid: this.isClientValid,
-                message: 'Client must have at least fice characters'
+                message: 'Client must have at least five characters'
             }
         ]
     }
     add(appointment) {
-        const creation_date = moment().format('YYYY-MM-DD HH:MM:SS')
-        const schedule_date = moment(appointment.schedule_date, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS')
-
+        const creation_date = moment().format('YYYY-MM-DD')
+        const schedule_date = moment(appointment.schedule_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
         const parameters = {
             schedule_date: {schedule_date, creation_date},
             client: {length: appointment.client.length}
@@ -50,7 +50,7 @@ class Appointment {
             const appointmentWithDate = {...appointment, creation_date, schedule_date}
 
             return repository.add(appointmentWithDate)
-                .then((results) => {
+                .then(results => {
                     const id = results.insertId
                     return {... appointment, id}
                 })
