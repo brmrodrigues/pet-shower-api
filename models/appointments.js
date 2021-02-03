@@ -61,20 +61,16 @@ class Appointment {
         return repository.list()
     }
 
-    findById(id, res) {
-        const sql = `SELECT * FROM appointments WHERE id=${id}`
+    findById(id) {
+        return repository.findById(id)
+                .then(async results => {
+                        const appointment = results[0]
+                        const cpf = appointment.client
 
-        connection.query(sql, async (error, results) => {
-            const appointment = results[0]
-            const cpf = appointment.client
-            if (error) {
-                res.status(400).json(error)
-            } else {
-                const {data} = await axios.get(`http://localhost:8082/${cpf}`)
-                appointment.client = data
-                res.status(200).json(appointment)
-            }
-        })
+                        const {data} = await axios.get(`http://localhost:8082/${cpf}`)
+                        appointment.client = data
+                        return appointment
+                    })
     }
 
     modify(id, values, res) {

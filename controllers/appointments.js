@@ -10,6 +10,10 @@ module.exports = app => {
   app.get('/appointments/:id', (req, res) => {
     const id = parseInt(req.params.id)
     Appointment.findById(id, res)
+      .then(appointment =>
+        res.status(200).json(appointment)
+      )
+      .catch(errors => res.status(400).json(errors))
   })
 
   app.post('/appointments', (req, res) => {

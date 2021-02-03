@@ -10,6 +10,11 @@ class Appointment {
         const sql = 'SELECT * FROM appointments'
         return query(sql)
     }
+
+    findById(id) {
+        const sql = `SELECT * FROM appointments WHERE id=${id}`
+        return query(sql)
+    }
 }
 
 module.exports = new Appointment()
