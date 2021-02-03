@@ -15,6 +15,16 @@ class Appointment {
         const sql = `SELECT * FROM appointments WHERE id=${id}`
         return query(sql)
     }
+
+    modify(id, values) {
+        const sql = 'UPDATE appointments SET ? WHERE id=?'
+        return query(sql, [values, id])
+    }
+
+    remove(id) {
+        const sql = 'DELETE FROM appointments WHERE id=?'
+        return query(sql, id)
+    }
 }
 
 module.exports = new Appointment()

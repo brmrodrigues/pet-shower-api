@@ -1,6 +1,5 @@
 const axios = require('axios')
 const moment = require('moment')
-const connection = require('../infra/db/connection')
 const repository = require('../repositories/appointment')
 
 class Appointment {
@@ -73,31 +72,18 @@ class Appointment {
                     })
     }
 
-    modify(id, values, res) {
+    modify(id, values) {
         if (values.schedule_date) {
-            values.schedule_date = moment(values.schedule_date, 'DD/MM/YYYY').format('YYYY-MM-DD HH:MM:SS')
+            values.schedule_date = moment(values.schedule_date, 'DD/MM/YYYY').format('YYYY-MM-DD')
         }
-        const sql = 'UPDATE appointments SET ? WHERE id=?'
 
-        connection.query(sql, [values, id], (error, results) => {
-            if (error) {
-                res.status(400).json(error)
-            } else {
-                res.status(200).json({...values, id})
-            }
-        })
+        return repository.modify(id, values)
+                .then(result => 'Appointed modified successfully')
     }
 
-    remove(id, res) {
-        const sql = 'DELETE FROM appointments WHERE id=?'
-
-        connection.query(sql, id, (error, results) => {
-            if (error) {
-                res.status(400).json(error)
-            } else {
-                res.status(200).json({id})
-            }
-        })
+    remove(id) {
+        return repository.remove(id)
+                .then(result => 'Appointment removed successfully')
     }
 }
 

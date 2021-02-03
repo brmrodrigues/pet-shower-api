@@ -28,11 +28,19 @@ module.exports = app => {
   app.patch('/appointments/:id', (req, res) => {
     const id = parseInt(req.params.id)
     const values = req.body
-    Appointment.modify(id, values, res)
+    Appointment.modify(id, values)
+      .then(resultMessage => {
+        res.status(200).json(resultMessage)
+      })
+      .catch(errors => res.status(400).json(errors))
   })
 
   app.delete('/appointments/:id', (req, res) => {
     const id = parseInt(req.params.id)
-    Appointment.remove(id, res)
+    Appointment.remove(id)
+      .then(resultMessage => {
+        res.status(200).json(resultMessage)
+      })
+      .catch(errors => res.status(400).json(errors))
   })
 }
